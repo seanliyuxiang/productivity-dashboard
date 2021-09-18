@@ -52,6 +52,21 @@ const init = () => {
       .then(json => console.log(json));
   };
 
+  const deleteTaskFromServer = taskID => {
+    const configObj = {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      }
+    };
+
+    // DELETE /tasks/:id
+    fetch(`${dailyTasksUrl}/${taskID}`, configObj)
+    .then(response => response.json())
+    .then(json => console.log(json));
+  };
+
   // function to render a single daily task that is persisting in db.json
   const renderSingleTask = singleTaskObj => {
     // create a div tag with the class of to-do-wrapper // parent tag
@@ -68,11 +83,18 @@ const init = () => {
       toDoItemDiv.childNodes[2].style.textDecoration = "line-through";
     }
 
+    // add event listener to listen for the single click to check off a task
     toDoItemDiv.addEventListener("click", () => {
       toDoItemDiv.childNodes[0].src = "./icons/checked.svg";
       toDoItemDiv.childNodes[2].style.textDecoration = "line-through";
       singleTaskObj.image = './icons/checked.svg';
       updateTaskCompletionStatusToServer(singleTaskObj);
+    });
+
+    // add event listener to listen for the double click to delete a task
+    toDoItemDiv.addEventListener('dblclick', () => {
+      toDoItemDiv.remove();
+      deleteTaskFromServer(singleTaskObj.id);
     });
   };
 
@@ -97,6 +119,7 @@ const init = () => {
                              <p class="to-do-text">${createToDoInput.value}</p>`;
     toDoListTag.appendChild(toDoItemDiv);
 
+    // add event listener to listen for the single click to check off a task
     toDoItemDiv.addEventListener("click", () => {
       toDoItemDiv.childNodes[0].src = "./icons/checked.svg";
       toDoItemDiv.childNodes[2].style.textDecoration = "line-through";
@@ -125,9 +148,16 @@ const init = () => {
       .then(response => response.json())
       .then(json => {
         console.log(json);
+        
         toDoItemDiv.addEventListener('click', () => {
           json.image = './icons/checked.svg';
           updateTaskCompletionStatusToServer(json);
+        });
+
+        // add event listener to listen for the double click to delete a task
+        toDoItemDiv.addEventListener('dblclick', () => {
+          toDoItemDiv.remove();
+          deleteTaskFromServer(json.id);
         });
       });
 
